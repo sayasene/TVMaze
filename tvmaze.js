@@ -12,27 +12,37 @@ const $searchForm = $("#searchForm");
  *    (if no image URL given by API, put in a default image URL)
  */
 
- function pick (obj, props) {
-
-	// Create new object
-	var picked = {};
-
-	// Loop through props and push to new object
-	for (let prop of props) {
-		picked[prop] = obj[prop];
-	}
-
-	// Return new object
-	return picked;
-
-}
-
 async function getShowsByTerm(term) {
   // ADD: Remove placeholder & make request to TVMaze search shows API.
-   let response = await axios.get('http://api.tvmaze.com/search/shows',{params:{q:term}})
+  let response = await axios.get('http://api.tvmaze.com/search/shows', { params: { q: term } })
+  //let showObjects = response.data.map(function(showData) {console.log(showData.show.name, showData.show.summary) })
+  //console.log(response.data)
+
+  //rename showData
+  let showObjects = response.data.map(function (showData) {
+    let img;
+    if( showData.show.image === null ) {
+      img = 'corgi.jpeg'
+    } else {
+      img = showData.show.image.medium
+    }
+
+      return {
+        id: showData.show.id,
+        name: showData.show.name,
+        summary: showData.show.summary,
+        image: img
+
+      }
+  })
+  console.log(showObjects)
+  return showObjects;
+
+
+  //let meow = response.data.map(function(showData) {console.log(showData.show.name) })
   //  map
-  console.log(response.data.map(pick(response.data,['show.id','show.name','show.summary','show.image.medium'])))
-    return response.data.map(pick(response.data,['show.id','show.name','show.summary','show.image.medium']));
+  //console.log(response.data.map(pick(response.data,['show.id','show.name','show.summary','show.image.medium'])))
+  //return response.data.map(pick(response.data,['show.id','show.name','show.summary','show.image.medium']));
 }
 
 
@@ -43,11 +53,11 @@ function populateShows(shows) {
 
   for (let show of shows) {
     const $show = $(
-        `<div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
+      `<div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
          <div class="media">
            <img 
-              src="http://static.tvmaze.com/uploads/images/medium_portrait/160/401704.jpg" 
-              alt="Bletchly Circle San Francisco" 
+              src="${show.image}" 
+              alt="${show.name}" 
               class="w-25 mr-3">
            <div class="media-body">
              <h5 class="text-primary">${show.name}</h5>
@@ -60,7 +70,8 @@ function populateShows(shows) {
        </div>
       `);
 
-    $showsList.append($show);  }
+    $showsList.append($show);
+  }
 }
 
 
